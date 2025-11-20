@@ -1,0 +1,71 @@
+name: Find Golf Deals
+
+on:
+  schedule:
+    # Runs every day at 9 AM EST (14:00 UTC)
+    - cron: '0 14 * * *'
+  
+  # Allows manual trigger from GitHub UI
+  workflow_dispatch:
+
+jobs:
+  find-deals:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests beautifulsoup4
+    
+    - name: Run deal finder
+      env:
+        ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+      run: |
+        python scripts/find_deals_with_api.py
+    
+    - name: Generate interactive dashboard
+      run: |
+        python scripts/generate_interactive_dashboard.py
+    
+    - name: Commit and push if changes
+      run: |
+        git config --local user.email "github-actions[bot]@users.noreply.github.com"
+        git config --local user.name "github-actions[bot]"
+        git add docs/index.html docs/deals.json docs/deal-history.json
+        git diff --quiet && git diff --staged --quiet || (git commit -m "🔄 Update deals - $(date +'%Y-%m-%d %H:%M')" && git push)
+```
+
+5. Scroll down and click **"Commit new file"**
+
+### Step 2: Delete the wrong `workflows` folder
+
+1. Go back to your repo root
+2. Click on the `workflows` folder (at root level)
+3. Click on `find-deals.yml`
+4. Click the **trash can icon** (Delete this file)
+5. Commit the deletion
+
+## ✅ You'll know it worked when:
+
+On your repo homepage, you should see:
+```
+.github/          ← This should now exist!
+docs/
+scripts/
+OVERVIEW.md
+...
+```
+
+And if you click into `.github/`, you'll see:
+```
+workflows/
+  └── find-deals.yml
