@@ -3,339 +3,428 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Golf Deals Dashboard</title>
+    <title>Golf Deals - Deal Selector</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { 
+        body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: #f5f5f5; padding: 20px; 
+            background: #f5f5f5;
+            padding: 20px;
         }
         .header {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white; padding: 30px; border-radius: 10px; margin-bottom: 30px;
+            color: white;
+            padding: 30px;
+            border-radius: 10px;
+            margin-bottom: 30px;
             box-shadow: 0 4px 6px rgba(0,0,0,0.1);
         }
         .header h1 { font-size: 2em; margin-bottom: 10px; }
+        .header .timestamp { opacity: 0.9; font-size: 0.9em; }
+        
+        .controls {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 1em;
+            transition: all 0.2s;
+        }
+        .btn-primary {
+            background: #667eea;
+            color: white;
+        }
+        .btn-primary:hover { background: #5568d3; }
+        .btn-success {
+            background: #48bb78;
+            color: white;
+        }
+        .btn-success:hover { background: #38a169; }
+        .btn-secondary {
+            background: #718096;
+            color: white;
+        }
+        .btn-secondary:hover { background: #4a5568; }
+        
         .stats {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px; margin-bottom: 30px;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
         }
         .stat-card {
-            background: white; padding: 20px; border-radius: 8px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
         .stat-card h3 { color: #666; font-size: 0.9em; margin-bottom: 8px; }
         .stat-card .value { font-size: 2em; font-weight: bold; color: #667eea; }
-        .deal-card {
-            background: white; padding: 20px; margin-bottom: 15px; border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1); border-left: 4px solid #667eea;
-            display: flex; justify-content: space-between; align-items: center;
+        
+        .filters {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
         }
+        .filters select {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            margin-right: 10px;
+        }
+        
+        .deal-card {
+            background: white;
+            padding: 20px;
+            margin-bottom: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #667eea;
+            display: flex;
+            gap: 20px;
+            align-items: center;
+            transition: all 0.2s;
+        }
+        .deal-card:hover { box-shadow: 0 4px 8px rgba(0,0,0,0.15); }
+        .deal-card.selected { background: #f0f4ff; border-left-color: #48bb78; }
         .deal-card.excellent { border-left-color: #f56565; }
         .deal-card.great { border-left-color: #ed8936; }
         .deal-card.good { border-left-color: #48bb78; }
+        
+        .deal-checkbox {
+            width: 24px;
+            height: 24px;
+            cursor: pointer;
+        }
+        
         .deal-info { flex: 1; }
         .deal-info h3 { color: #2d3748; margin-bottom: 10px; font-size: 1.2em; }
-        .deal-prices { display: flex; gap: 15px; margin-bottom: 10px; flex-wrap: wrap; }
-        .price-tag { padding: 5px 10px; border-radius: 5px; font-weight: 600; }
-        .original-price { background: #fed7d7; color: #c53030; text-decoration: line-through; }
-        .sale-price { background: #c6f6d5; color: #22543d; font-size: 1.2em; }
-        .savings { background: #bee3f8; color: #2c5282; }
+        .deal-prices {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 10px;
+            flex-wrap: wrap;
+        }
+        .price-tag {
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-weight: 600;
+        }
+        .original-price {
+            background: #fed7d7;
+            color: #c53030;
+            text-decoration: line-through;
+        }
+        .sale-price {
+            background: #c6f6d5;
+            color: #22543d;
+            font-size: 1.2em;
+        }
+        .savings {
+            background: #bee3f8;
+            color: #2c5282;
+        }
+        .deal-source {
+            font-size: 0.85em;
+            color: #718096;
+            margin-top: 5px;
+        }
         .deal-quality {
-            display: inline-block; padding: 5px 12px; border-radius: 20px;
-            font-size: 0.9em; font-weight: 600;
+            display: inline-block;
+            padding: 5px 12px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: 600;
         }
         .quality-excellent { background: #fed7d7; color: #c53030; }
         .quality-great { background: #feebc8; color: #c05621; }
         .quality-good { background: #c6f6d5; color: #22543d; }
         .quality-fair { background: #bee3f8; color: #2c5282; }
-        .btn {
-            padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;
-            font-weight: 600; text-decoration: none; text-align: center;
+        
+        .deal-actions {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
-        .btn-primary { background: #667eea; color: white; }
-        .btn:hover { opacity: 0.9; }
+        .deal-actions .btn {
+            padding: 8px 16px;
+            font-size: 0.9em;
+            white-space: nowrap;
+        }
+        
+        .selection-summary {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            min-width: 250px;
+            display: none;
+        }
+        .selection-summary.active { display: block; }
+        .selection-summary h3 { margin-bottom: 15px; color: #2d3748; }
+        .selection-count {
+            font-size: 2em;
+            font-weight: bold;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+        
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #48bb78;
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            display: none;
+            animation: slideIn 0.3s ease;
+        }
+        .notification.show { display: block; }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        #copyOutput {
+            display: none;
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        #copyOutput pre {
+            white-space: pre-wrap;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9em;
+        }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>⛳ Golf Deals Dashboard</h1>
-        <p>Found deals from golfclearancewarehouse.com • Last updated: 2025-11-20 05:20</p>
+        <h1>⛳ Golf Deals - Deal Selector</h1>
+        <div class="timestamp">Last updated: November 20, 2025 at 11:32 PM</div>
+    </div>
+    
+    <div class="controls">
+        <button class="btn btn-primary" onclick="selectAll()">Select All</button>
+        <button class="btn btn-secondary" onclick="deselectAll()">Deselect All</button>
+        <button class="btn btn-success" onclick="copySelectedDeals()">📋 Copy Selected for Reddit</button>
+        <button class="btn btn-secondary" onclick="exportToCSV()">💾 Export to CSV</button>
+        <span style="margin-left: auto; font-weight: 600; color: #718096;">
+            <span id="selectedCount">0</span> deals selected
+        </span>
     </div>
     
     <div class="stats">
         <div class="stat-card">
             <h3>Total Deals</h3>
-            <div class="value">14</div>
+            <div class="value">0</div>
         </div>
         <div class="stat-card">
             <h3>Avg Discount</h3>
-            <div class="value">52.9%</div>
+            <div class="value">0.0%</div>
         </div>
         <div class="stat-card">
             <h3>Best Deal</h3>
-            <div class="value">77%</div>
+            <div class="value">0%</div>
         </div>
         <div class="stat-card">
             <h3>Total Savings</h3>
-            <div class="value">$219.80</div>
+            <div class="value">$0</div>
         </div>
     </div>
     
-    <div id="dealsContainer">
+    <div class="filters">
+        <select id="qualityFilter" onchange="filterDeals()">
+            <option value="all">All Quality Levels</option>
+            <option value="50">🔥 50%+ off only</option>
+            <option value="30">30%+ off only</option>
+            <option value="20">20%+ off only</option>
+        </select>
         
-        <div class="deal-card excellent">
-            <div class="deal-info">
-                <h3>Women's FootJoy StaSof Glove - Canada Edition - Previous Season Styles</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$35.00</span>
-                    <span class="price-tag sale-price">$7.95</span>
-                    <span class="price-tag savings">Save $27.05 (77% off)</span>
-                </div>
-                <span class="deal-quality quality-excellent">🔥 EXCELLENT</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golfclearancewarehouse.com/category-s/99.htm" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card excellent">
-            <div class="deal-info">
-                <h3>Men's FootJoy StaSof Glove - Canada Edition - Previous Season Styles</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$35.00</span>
-                    <span class="price-tag sale-price">$9.95</span>
-                    <span class="price-tag savings">Save $25.05 (72% off)</span>
-                </div>
-                <span class="deal-quality quality-excellent">🔥 EXCELLENT</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golfclearancewarehouse.com/category-s/99.htm" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card excellent">
-            <div class="deal-info">
-                <h3>Footjoy Women's Golf Gloves - WeatherSof (2 pack)</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$39.99</span>
-                    <span class="price-tag sale-price">$11.95</span>
-                    <span class="price-tag savings">Save $28.04 (70% off)</span>
-                </div>
-                <span class="deal-quality quality-excellent">🔥 EXCELLENT</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golfclearancewarehouse.com/category-s/99.htm" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card excellent">
-            <div class="deal-info">
-                <h3>Footjoy Women's Prior Generation Stasof Glove - White</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$32.99</span>
-                    <span class="price-tag sale-price">$9.95</span>
-                    <span class="price-tag savings">Save $23.04 (70% off)</span>
-                </div>
-                <span class="deal-quality quality-excellent">🔥 EXCELLENT</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golfclearancewarehouse.com/category-s/99.htm" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card excellent">
-            <div class="deal-info">
-                <h3>TAYLORMADE Stratus Jr. Glove</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$13.99</span>
-                    <span class="price-tag sale-price">$4.87</span>
-                    <span class="price-tag savings">Save $9.12 (65% off)</span>
-                </div>
-                <span class="deal-quality quality-excellent">🔥 EXCELLENT</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golftown.com/en-CA/sale/clearance/golf-gloves/" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card excellent">
-            <div class="deal-info">
-                <h3>Footjoy Men's Golf Gloves - WeatherSof (2 pack)</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$39.99</span>
-                    <span class="price-tag sale-price">$13.95</span>
-                    <span class="price-tag savings">Save $26.04 (65% off)</span>
-                </div>
-                <span class="deal-quality quality-excellent">🔥 EXCELLENT</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golfclearancewarehouse.com/category-s/99.htm" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card excellent">
-            <div class="deal-info">
-                <h3>Footjoy Women's Prior Generation WeatherSof Glove - 2 Colours</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$17.99</span>
-                    <span class="price-tag sale-price">$6.95</span>
-                    <span class="price-tag savings">Save $11.04 (61% off)</span>
-                </div>
-                <span class="deal-quality quality-excellent">🔥 EXCELLENT</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golfclearancewarehouse.com/category-s/99.htm" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card excellent">
-            <div class="deal-info">
-                <h3>Women's FootJoy ContourFLX Glove - Previous Season Styles</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$30.00</span>
-                    <span class="price-tag sale-price">$11.95</span>
-                    <span class="price-tag savings">Save $18.05 (60% off)</span>
-                </div>
-                <span class="deal-quality quality-excellent">🔥 EXCELLENT</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golfclearancewarehouse.com/category-s/99.htm" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card excellent">
-            <div class="deal-info">
-                <h3>Prior Generation Men's SciFlex Tour Golf Glove</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$29.99</span>
-                    <span class="price-tag sale-price">$12.95</span>
-                    <span class="price-tag savings">Save $17.04 (57% off)</span>
-                </div>
-                <span class="deal-quality quality-excellent">🔥 EXCELLENT</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golfclearancewarehouse.com/category-s/99.htm" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card excellent">
-            <div class="deal-info">
-                <h3>Footjoy Men's Prior Generation WeatherSof Glove - 2 Colours</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$20.00</span>
-                    <span class="price-tag sale-price">$8.95</span>
-                    <span class="price-tag savings">Save $11.05 (55% off)</span>
-                </div>
-                <span class="deal-quality quality-excellent">🔥 EXCELLENT</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golfclearancewarehouse.com/category-s/99.htm" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card great">
-            <div class="deal-info">
-                <h3>- FOOTJOY Men's Contour FLX Golf Glove</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$22.99</span>
-                    <span class="price-tag sale-price">$14.87</span>
-                    <span class="price-tag savings">Save $8.12 (35% off)</span>
-                </div>
-                <span class="deal-quality quality-great">🔥 GREAT</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golftown.com/en-CA/sale/clearance/golf-gloves/" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card good">
-            <div class="deal-info">
-                <h3>- FOOTJOY Prior Generation - Men's StaSof Golf Glove</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$32.99</span>
-                    <span class="price-tag sale-price">$24.87</span>
-                    <span class="price-tag savings">Save $8.12 (25% off)</span>
-                </div>
-                <span class="deal-quality quality-good">Good</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golftown.com/en-CA/sale/clearance/golf-gloves/" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card fair">
-            <div class="deal-info">
-                <h3>- FOOTJOY Prior Generation - Men's WeatherSof Golf Gloves - 2 Pack</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$28.99</span>
-                    <span class="price-tag sale-price">$24.97</span>
-                    <span class="price-tag savings">Save $4.02 (14% off)</span>
-                </div>
-                <span class="deal-quality quality-fair">Fair</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golftown.com/en-CA/sale/clearance/golf-gloves/" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
-        <div class="deal-card fair">
-            <div class="deal-info">
-                <h3>FOOTJOY Prior Generation - Women's WeatherSof Golf Gloves - 2 Pack</h3>
-                <div class="deal-prices">
-                    <span class="price-tag original-price">$28.99</span>
-                    <span class="price-tag sale-price">$24.97</span>
-                    <span class="price-tag savings">Save $4.02 (14% off)</span>
-                </div>
-                <span class="deal-quality quality-fair">Fair</span>
-                <div style="margin-top:8px;font-size:0.85em;color:#718096;">
-                    💡 Link goes to category page - search for product name once there
-                </div>
-            </div>
-            <div class="deal-actions">
-                <a href="https://www.golftown.com/en-CA/sale/clearance/golf-gloves/" target="_blank" class="btn btn-primary">Browse Category</a>
-            </div>
-        </div>
-        
+        <select id="sourceFilter" onchange="filterDeals()">
+            <option value="all">All Sources</option>
+            <option value="Golf Clearance Warehouse">Golf Clearance Warehouse</option>
+            <option value="Golf Town">Golf Town</option>
+        </select>
     </div>
+    
+    <div id="copyOutput">
+        <h3>📋 Reddit Posts (Ready to Copy)</h3>
+        <pre id="copyText"></pre>
+        <button class="btn btn-primary" onclick="copyToClipboard()">Copy to Clipboard</button>
+    </div>
+    
+    <div id="dealsContainer">
+
+    </div>
+    
+    <div id="notification" class="notification"></div>
+    
+    <script>
+        const deals = [];
+        
+        function updateSelection() {
+            const checkboxes = document.querySelectorAll('.deal-checkbox');
+            const selectedCount = Array.from(checkboxes).filter(cb => cb.checked).length;
+            document.getElementById('selectedCount').textContent = selectedCount;
+            
+            // Update card appearance
+            checkboxes.forEach((cb, index) => {
+                const card = cb.closest('.deal-card');
+                if (cb.checked) {
+                    card.classList.add('selected');
+                } else {
+                    card.classList.remove('selected');
+                }
+            });
+        }
+        
+        function selectAll() {
+            document.querySelectorAll('.deal-checkbox:not([style*="display: none"])').forEach(cb => {
+                const card = cb.closest('.deal-card');
+                if (card.style.display !== 'none') {
+                    cb.checked = true;
+                }
+            });
+            updateSelection();
+        }
+        
+        function deselectAll() {
+            document.querySelectorAll('.deal-checkbox').forEach(cb => cb.checked = false);
+            updateSelection();
+        }
+        
+        function filterDeals() {
+            const qualityFilter = document.getElementById('qualityFilter').value;
+            const sourceFilter = document.getElementById('sourceFilter').value;
+            
+            document.querySelectorAll('.deal-card').forEach(card => {
+                const discount = parseFloat(card.dataset.discount);
+                const source = card.dataset.source;
+                
+                let show = true;
+                
+                if (qualityFilter !== 'all' && discount < parseFloat(qualityFilter)) {
+                    show = false;
+                }
+                
+                if (sourceFilter !== 'all' && source !== sourceFilter) {
+                    show = false;
+                }
+                
+                card.style.display = show ? 'flex' : 'none';
+            });
+        }
+        
+        function copySelectedDeals() {
+            const checkboxes = document.querySelectorAll('.deal-checkbox');
+            const selectedDeals = [];
+            
+            checkboxes.forEach((cb, index) => {
+                if (cb.checked) {
+                    selectedDeals.push(deals[parseInt(cb.closest('.deal-card').dataset.index)]);
+                }
+            });
+            
+            if (selectedDeals.length === 0) {
+                showNotification('Please select at least one deal!', 'error');
+                return;
+            }
+            
+            let redditText = '';
+            selectedDeals.forEach(deal => {
+                redditText += formatRedditPost(deal) + '\n\n---\n\n';
+            });
+            
+            document.getElementById('copyText').textContent = redditText;
+            document.getElementById('copyOutput').style.display = 'block';
+            document.getElementById('copyOutput').scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function formatRedditPost(deal) {
+            const qualityEmoji = deal.discount_pct >= 50 ? '🔥' : deal.discount_pct >= 30 ? '🔥' : '⛳';
+            
+            return `**${qualityEmoji} [${deal.source}] ${deal.product_name} - $${deal.sale_price.toFixed(2)} (${deal.discount_pct.toFixed(0)}% off!)**
+
+~~$${deal.original_price.toFixed(2)}~~ **$${deal.sale_price.toFixed(2)}** - Save $${deal.savings.toFixed(2)}
+
+[Link to deals page](${deal.url})
+
+Source: ${deal.source}`;
+        }
+        
+        function copyToClipboard() {
+            const text = document.getElementById('copyText').textContent;
+            navigator.clipboard.writeText(text).then(() => {
+                showNotification('✅ Copied to clipboard!');
+            });
+        }
+        
+        function exportToCSV() {
+            const checkboxes = document.querySelectorAll('.deal-checkbox');
+            const selectedDeals = [];
+            
+            checkboxes.forEach((cb, index) => {
+                if (cb.checked) {
+                    selectedDeals.push(deals[parseInt(cb.closest('.deal-card').dataset.index)]);
+                }
+            });
+            
+            if (selectedDeals.length === 0) {
+                showNotification('Please select at least one deal!', 'error');
+                return;
+            }
+            
+            let csv = 'Product,Original Price,Sale Price,Savings,Discount %,Source,URL\n';
+            selectedDeals.forEach(deal => {
+                csv += `"${deal.product_name}",${deal.original_price},${deal.sale_price},${deal.savings},${deal.discount_pct},"${deal.source}","${deal.url}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'golf-deals-' + new Date().toISOString().split('T')[0] + '.csv';
+            a.click();
+            
+            showNotification('✅ CSV exported!');
+        }
+        
+        function showNotification(message, type = 'success') {
+            const notification = document.getElementById('notification');
+            notification.textContent = message;
+            notification.style.background = type === 'error' ? '#f56565' : '#48bb78';
+            notification.classList.add('show');
+            
+            setTimeout(() => {
+                notification.classList.remove('show');
+            }, 3000);
+        }
+    </script>
 </body>
 </html>
